@@ -5,6 +5,12 @@ namespace App\Models;
 use App\Scopes\PlayerScope;
 use App\User;
 
+/**
+ * Class Player
+ * @package App\Models
+ *
+ * @extends App\User
+ */
 class Player extends User
 {
     /**
