@@ -31,10 +31,15 @@ class User extends Model
 
     use HasFactory;
 
-    public function buildTeam()
+    public function scopeIsGoalie($query, $value = true)
+    {
+        return $query->where('can_play_goalie', $value);
+    }
+
+    public function buildTeams()
     {
         $coaches = Coach::all()->shuffle();
-        $players = Player::all()->keyBy('id')->sortBy('ranking');
+        $players = Player::all()->keyBy('id')->sortByDesc('ranking');
 
         $goalies = $players->filter(function ($player) {
             return $player->can_play_goalie;
@@ -56,6 +61,7 @@ class User extends Model
         $faker = Factory::create();
         for ($i = 0; $i < $numberOfTeams; $i++) {
             $teams->put($i, [
+                'id' => $i,
                 'name' => $faker->streetName,
                 'players' => new Collection(),
                 'coach' => $coaches->shift()
@@ -73,11 +79,11 @@ class User extends Model
         while ($players->isNotEmpty()) {
             foreach ($teams as $key => $team) {
                 $player = $players->shift();
-                if ($player && $team["players"]->count() < config('teams.max_team_size')) {
+                if ($player && $team["players"]->count() < config('teams.min_team_size')) {
                     $team["players"]->push($player);
                 }
             }
-            $players->reverse();
+            $players = $players->reverse();
         }
 
         return $teams;
